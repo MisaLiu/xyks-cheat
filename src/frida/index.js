@@ -24,6 +24,8 @@ const launchFrida = async () => {
   // Init Frida
   Script.message.connect(onMessage);
   await Script.load();
+
+  console.log('Frida is now READY');
 };
 
 launchFrida();
