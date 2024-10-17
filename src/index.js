@@ -25,7 +25,7 @@ const FakeExerciseResult = (exam) => {
 
   for (let i = 0; i < result.questions.length; i++) {
     const question = result.questions[i];
-    const pointPaths = getRandomPathPoint();
+    const pointPaths = getRandomPathPoint(Math.floor(randomNum(2, 8)));
 
     question.status = 1;
     question.userAnswer = question.answer;
