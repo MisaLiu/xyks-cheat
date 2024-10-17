@@ -22,7 +22,7 @@ export const setFakeResult = async (exam) => {
     const { Page, Runtime } = client;
     await Page.enable();
 
-    await sleep(9000);
+    await sleep(8000);
 
     await Runtime.evaluate({
       expression: `window.localStorage.setItem('__local_exerciseResult', '${resultBase}')`
