@@ -1,0 +1,8 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@types/frida-gum": "^18.7.1",
+    "chrome-remote-interface": "^0.33.2",
+    "frida": "^16.5.6"
+  }
+}
