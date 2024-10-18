@@ -46,6 +46,12 @@ FridaEvent.on('exercise_start', async (info) => {
   const exam = info.examVO;
   const fakeResult = FakeExerciseResult(exam);
 
+  console.log('New exam detected!');
+  console.log(`  -> ID: ${info.pkIdStr}`);
+  console.log(`  -> Rival name: ${info.otherUser.userName} (ID: ${info.otherUser.userId})`);
+  console.log(`  -> Rival winned rounds: ${info.otherWinCount}`);
+  console.log('');
+
   try {
     setFakeResult(fakeResult);
   } catch (e) {
