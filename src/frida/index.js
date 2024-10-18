@@ -2,14 +2,36 @@ import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import { readFileSync } from 'fs';
 import { EventEmitter } from 'events';
+import { decode as decodeBase64 } from 'js-base64';
 import frida from 'frida';
+
+const QuestionListReg = /^javascript\:\(window.dataDecrypt_(\d+)_(\d+)\s\&\&\swindow\.dataDecrypt_(\d+)_(\d+)\(\"(.+)\"\)\)$/;
 
 const ScriptPath = resolve(dirname(fileURLToPath(import.meta.url)), './hook.js');
 const EventListener = new EventEmitter();
 
+const decodeRawPKInfo = (url) => {
+  const callerBase64 = QuestionListReg.exec(url)[5];
+  const resultJson = JSON.parse(decodeBase64(callerBase64))[1];
+  const resultBase64 = resultJson.result.replaceAll('\n', '');
+  const pkInfoJson = JSON.parse(decodeBase64(resultBase64));
+  return pkInfoJson;
+};
+
 const onMessage = (message, data) => {
-  if (message.type === 'send') {
-    EventListener.emit('exercise_start', message.payload);
+  if (message.type !== 'send') {
+    console.log(JSON.stringify(message, null, 2));
+    return;
+  }
+
+  const { payload } = message;
+  if (payload.type === 'pkInfoCaller') {
+    try {
+      const pkInfo = decodeRawPKInfo(payload.data);
+      EventListener.emit('exercise_start', pkInfo);
+    } catch (e) {
+      console.error(e);
+    }
   }
 };
 
