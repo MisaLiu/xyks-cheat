@@ -25,7 +25,7 @@ const onMessage = (message, data) => {
   }
 
   const { payload } = message;
-  if (payload.type === 'pkInfoCaller') {
+  if (payload.type === 'targetLoadUrl' && QuestionListReg.test(payload.data)) {
     try {
       const pkInfo = decodeRawPKInfo(payload.data);
       EventListener.emit('exercise_start', pkInfo);
