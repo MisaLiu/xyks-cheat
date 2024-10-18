@@ -19,7 +19,8 @@ Special thanks to [th](https://github.com/xmexg/xyks)[es](https://github.com/Fos
 
 1. Clone this repo to your local space
 2. `npm install`
-3. `node ./src/index.js`
+3. `node run start`
+4. (Optional) `node run start:auto` *Note: only tested on 1080x1920 resolution.*
 
 You might need to use `adb forward` to forward Frida and WebView devtools if you can't connect to them.
 
