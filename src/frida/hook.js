@@ -13,15 +13,8 @@ Java.perform(function() {
   };
 
   WebView.loadUrl.overload('java.lang.String').implementation = function(url) {
-    if (ExerciseStartUrlReg.test(url)) {
-      console.log('Exercise started!');
-      isExercising = true;
-    }
-
-    if (ExerciseEndUrlReg.test(url)) {
-      console.log('Exercise stoped!');
-      isExercising = false;
-    }
+    if (ExerciseStartUrlReg.test(url)) isExercising = true;
+    if (ExerciseEndUrlReg.test(url)) isExercising = false;
 
     // Get Question list & answers
     if (QuestionListReg.test(url)) {
