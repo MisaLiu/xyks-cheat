@@ -1,6 +1,5 @@
 import FridaEvent from './frida/index.js';
 import { setFakeResult } from './webview.js';
-import { sleep } from './utils.js';
 
 const randomNum = (min, max) => Math.random() * (max - min + 1) + min;
 
@@ -46,8 +45,6 @@ const FakeExerciseResult = (exam) => {
 FridaEvent.on('exercise_start', async (info) => {
   const exam = info.examVO;
   const fakeResult = FakeExerciseResult(exam);
-
-  await sleep(5000);
 
   try {
     setFakeResult(fakeResult);
