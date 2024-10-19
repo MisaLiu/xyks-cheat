@@ -12,19 +12,19 @@ const LoopStartExercise = async () => {
     420, 1440
   ]);
 
-  await sleep(2000);
+  await sleep(2600);
   await adb.shell([
     'input', 'keyboard', 'keyevent',
     4
   ]);
 
-  await sleep(200);
+  await sleep(300);
   await adb.shell([
-    'input', 'touchscreen', 'tap',
-    92, 140
+    'input', 'keyboard', 'keyevent',
+    4
   ]);
 
-  await sleep(200);
+  await sleep(300);
   await adb.shell([
     'input', 'touchscreen', 'tap',
     540, 1330
@@ -32,4 +32,4 @@ const LoopStartExercise = async () => {
 };
 
 setImmediate(() => LoopStartExercise());
-setInterval(() => LoopStartExercise(), 3000);
+setInterval(() => LoopStartExercise(), 4000);
