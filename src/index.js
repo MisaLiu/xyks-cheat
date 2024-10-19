@@ -8,9 +8,6 @@ import { sleep, FakeExerciseResult, getPkResultPageUrl } from './utils.js';
  */
 let webview = null;
 
-/**
- * @returns {@type {CDP.Client | Promise<CDP.Client>}}
- */
 const waitForWebView = (timeout = 5000) => {
   if (webview) return webview;
   return new Promise((res, rej) => {
