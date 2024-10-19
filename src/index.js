@@ -1,60 +1,83 @@
+import CDP from 'chrome-remote-interface';
+import { encode as encodeBase64 } from 'js-base64';
 import FridaEvent from './frida/index.js';
-import { setFakeResult } from './webview.js';
+import { sleep, FakeExerciseResult, getPkResultPageUrl } from './utils.js';
 
-const randomNum = (min, max) => Math.random() * (max - min + 1) + min;
+/**
+ * @type {null | CDP.Client}
+ */
+let webview = null;
 
-const getRandomPathPoint = (count = 10) => {
-  const result = [];
+/**
+ * @returns {@type {CDP.Client | Promise<CDP.Client>}}
+ */
+const waitForWebView = (timeout = 5000) => {
+  if (webview) return webview;
+  return new Promise((res, rej) => {
+    const startTime = Date.now();
+    const waitFn = () => {
+      const currentTime = Date.now();
 
-  for (let i = 0; i < count; i++) {
-    result.push({
-      x: randomNum(0, 600),
-      y: randomNum(0, 600)
-    });
-  }
+      if (currentTime - startTime > timeout) {
+        rej('Wait timeout');
+        clearInterval(clockId);
+        return;
+      }
 
-  return [ result ];
-};
+      if (!webview) return;
 
-const FakeExerciseResult = (exam) => {
-  const result = { ...exam };
-
-  result.correctCnt = result.questionCnt;
-  result.costTime = 1;
-
-  for (let i = 0; i < result.questions.length; i++) {
-    const question = result.questions[i];
-    const pointPaths = getRandomPathPoint(Math.floor(randomNum(2, 8)));
-
-    question.status = 1;
-    question.userAnswer = question.answer;
-    question.script = JSON.stringify(pointPaths);
-    question.curTrueAnswer = {
-      recognizeResult: question.answer,
-      pathPoints: pointPaths,
-      answer: 1,
-      showReductionFraction: 0,
+      res(webview);
+      clearInterval(clockId);
     };
-  }
 
-  result.updatedTime = Date.now();
+    setImmediate(() => waitFn());
+    let clockId = setInterval(() => waitFn(), 100);
+  });
+}
 
-  return result;
-};
+FridaEvent.on('exercise_start', async () => {
+  console.log('New exam detected!');
 
-FridaEvent.on('exercise_start', async (info) => {
+  await sleep(100);
+  webview = await CDP({
+    local: true,
+  });
+});
+
+FridaEvent.on('exercise_end', async () => {
+  console.log('----------------------');
+  console.log('');
+
+  if (webview) await webview.close();
+});
+
+FridaEvent.on('exercise_info', async (info) => {
+  await waitForWebView();
+  const { Page, Runtime } = webview;
+  await Page.enable();
+
   const exam = info.examVO;
   const fakeResult = FakeExerciseResult(exam);
 
-  console.log('New exam detected!');
   console.log(`  -> ID: ${info.pkIdStr}`);
   console.log(`  -> Rival name: ${info.otherUser.userName} (ID: ${info.otherUser.userId})`);
   console.log(`  -> Rival winned rounds: ${info.otherWinCount}`);
-  console.log('');
+  console.log(`  -> Your winned rounds: ${info.selfWinCount}`);
 
   try {
-    setFakeResult(fakeResult);
+    await sleep(100);
+    const fakeResultStr = JSON.stringify(fakeResult);
+    const fakeResultBase64 = encodeBase64(fakeResultStr);
+
+    await Runtime.evaluate({
+      expression: `window.localStorage.setItem('__local_exerciseResult', '${fakeResultBase64}')`
+    });
+    await Runtime.evaluate({
+      expression: `window.open('${getPkResultPageUrl(fakeResult.pkIdStr)}')`
+    });
   } catch (e) {
     console.error(e);
+  } finally {
+    if (webview) await webview.close();
   }
 });

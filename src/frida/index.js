@@ -5,6 +5,8 @@ import { EventEmitter } from 'events';
 import { decode as decodeBase64 } from 'js-base64';
 import frida from 'frida';
 
+const ExerciseStartUrlReg = /\/bh5\/leo-web-oral-pk\/exercise\.html\?/;
+const ExerciseEndUrlReg = /\/bh5\/leo-web-oral-pk\/result\.html\?/;
 const QuestionListReg = /^javascript\:\(window.dataDecrypt_(\d+)_(\d+)\s\&\&\swindow\.dataDecrypt_(\d+)_(\d+)\(\"(.+)\"\)\)$/;
 
 const ScriptPath = resolve(dirname(fileURLToPath(import.meta.url)), './hook.js');
@@ -25,12 +27,21 @@ const onMessage = (message, data) => {
   }
 
   const { payload } = message;
-  if (payload.type === 'targetLoadUrl' && QuestionListReg.test(payload.data)) {
-    try {
-      const pkInfo = decodeRawPKInfo(payload.data);
-      EventListener.emit('exercise_start', pkInfo);
-    } catch (e) {
-      console.error(e);
+  if (payload.type === 'targetLoadUrl') {
+    if (ExerciseStartUrlReg.test(payload.data)) {
+      EventListener.emit('exercise_start');
+    }
+    if (ExerciseEndUrlReg.test(payload.data)) {
+      EventListener.emit('exercise_end');
+    }
+
+    if (QuestionListReg.test(payload.data)) {
+      try {
+        const pkInfo = decodeRawPKInfo(payload.data);
+        EventListener.emit('exercise_info', pkInfo);
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
 };
