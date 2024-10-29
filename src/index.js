@@ -3,6 +3,8 @@ import { encode as encodeBase64 } from 'js-base64';
 import FridaEvent from './frida/index.js';
 import { sleep, FakeExerciseResult, getPkResultPageUrl } from './utils.js';
 
+const QUESTION_MAGN = 3;
+
 /**
  * @type {null | CDP.Client}
  */
@@ -54,7 +56,7 @@ FridaEvent.on('exercise_info', async (info) => {
   await Page.enable();
 
   const exam = info.examVO;
-  const fakeResult = FakeExerciseResult(exam);
+  const fakeResult = FakeExerciseResult(exam, QUESTION_MAGN);
 
   console.log(`  -> ID: ${info.pkIdStr}`);
   console.log(`  -> Rival name: ${info.otherUser.userName} (ID: ${info.otherUser.userId})`);
@@ -65,6 +67,8 @@ FridaEvent.on('exercise_info', async (info) => {
     await sleep(100);
     const fakeResultStr = JSON.stringify(fakeResult);
     const fakeResultBase64 = encodeBase64(fakeResultStr);
+
+    await sleep(fakeResult.questionCnt * 200 + (QUESTION_MAGN * 1000));
 
     await Runtime.evaluate({
       expression: `window.localStorage.setItem('__local_exerciseResult', '${fakeResultBase64}')`

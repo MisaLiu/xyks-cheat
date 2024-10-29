@@ -16,28 +16,38 @@ export const getRandomPathPoint = (count = 10) => {
   return [ result ];
 };
 
-export const FakeExerciseResult = (exam) => {
+export const FakeExerciseResult = (exam, magn = 1) => {
   const result = { ...exam };
+  const oldQuestions = [ ...result.questions ];
 
-  result.correctCnt = result.questionCnt;
-  result.costTime = 1;
+  result.questions = [];
 
-  for (let i = 0; i < result.questions.length; i++) {
-    const question = result.questions[i];
-    const pointPaths = getRandomPathPoint(Math.floor(randomNum(2, 8)));
+  for (let x = 0; x < magn; x++) {
+    for (let i = 0; i < oldQuestions.length; i++) {
+      const currQuestionIndex = (oldQuestions.length * x) + i;
+      const question = { ...oldQuestions[i] };
+      const pointPaths = getRandomPathPoint(Math.floor(randomNum(2, 8)));
 
-    question.status = 1;
-    question.userAnswer = question.answer;
-    question.script = JSON.stringify(pointPaths);
-    question.curTrueAnswer = {
-      recognizeResult: question.answer,
-      pathPoints: pointPaths,
-      answer: 1,
-      showReductionFraction: 0,
-    };
+      question.id = currQuestionIndex;
+      question.status = 1;
+      question.userAnswer = question.answers[0];
+      question.script = JSON.stringify(pointPaths);
+      question.curTrueAnswer = {
+        recognizeResult: question.answers[0],
+        pathPoints: pointPaths,
+        answer: 1,
+        showReductionFraction: 0,
+      };
+
+      result.questions.push(question);
+    }
   }
 
-  result.updatedTime = Date.now();
+  result.questionCnt = result.questions.length;
+  result.correctCnt = result.questionCnt;
+
+  result.costTime = result.questionCnt * 200 + (magn * 1000);
+  result.updatedTime = Date.now() + (result.questionCnt * 200) + (magn * 1000);
 
   return result;
 };
