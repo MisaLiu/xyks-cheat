@@ -68,7 +68,7 @@ FridaEvent.on('exercise_info', async (info) => {
     const fakeResultStr = JSON.stringify(fakeResult);
     const fakeResultBase64 = encodeBase64(fakeResultStr);
 
-    await sleep(fakeResult.questionCnt * 200 + (QUESTION_MAGN * 1000));
+    await sleep(fakeResult.questionCnt * 200);
 
     await Runtime.evaluate({
       expression: `window.localStorage.setItem('__local_exerciseResult', '${fakeResultBase64}')`
