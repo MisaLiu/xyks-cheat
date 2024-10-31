@@ -62,13 +62,14 @@ FridaEvent.on('exercise_info', async (info) => {
   console.log(`  -> Rival name: ${info.otherUser.userName} (ID: ${info.otherUser.userId})`);
   console.log(`  -> Rival winned rounds: ${info.otherWinCount}`);
   console.log(`  -> Your winned rounds: ${info.selfWinCount}`);
+  console.log(`  -> Wait for ${Math.round((exam.questionCnt * 200 + QUESTION_MAGN * 1000) / 100) / 10}s...`);
 
   try {
     await sleep(100);
     const fakeResultStr = JSON.stringify(fakeResult);
     const fakeResultBase64 = encodeBase64(fakeResultStr);
 
-    await sleep(fakeResult.questionCnt * 200);
+    await sleep(exam.questionCnt * 200 + QUESTION_MAGN * 1000);
 
     await Runtime.evaluate({
       expression: `window.localStorage.setItem('__local_exerciseResult', '${fakeResultBase64}')`
